@@ -1,13 +1,13 @@
 use bevy::prelude::Component;
 
 #[derive(Component, Clone)]
-pub struct LODDistances {
+pub struct LodDistances {
     pub l1: f32,
     pub l2: f32,
     pub l3: f32, // if l3 = 0 then l3 LOD will be visible always
 }
 
-impl LODDistances {
+impl LodDistances {
     pub fn new<T: Into<f32> + PartialOrd>(l1: T, l2: T, l3: T) -> Self {
         let l1 = l1.into();
         let l2 = l2.into();

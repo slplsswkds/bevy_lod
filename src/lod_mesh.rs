@@ -1,20 +1,20 @@
 use bevy::prelude::{Component, Handle, Mesh, Query, Transform, With, Camera3d, Res};
-use crate::lod_distance::LODDistances;
-use crate::lod_settings::LODSettings;
+use crate::lod_distance::LodDistances;
+use crate::lod_settings::LodSettings;
 
 
 // !!!! Remove Clone impl !!!!!
 /// LODs meshes for single entities.
 #[derive(Component, Clone)]
-pub struct LODMesh {
+pub struct LodMesh {
     pub l1: Option<Handle<Mesh>>,
     pub l2: Option<Handle<Mesh>>,
     pub l3: Option<Handle<Mesh>>,
 }
 
 pub fn lod_mesh_single(
-    mut query_lod: Query<(&mut Handle<Mesh>, &Transform, &LODMesh, Option<&LODDistances>)>,
-    lod_settings: Res<LODSettings>,
+    mut query_lod: Query<(&mut Handle<Mesh>, &Transform, &LodMesh, Option<&LodDistances>)>,
+    lod_settings: Res<LodSettings>,
     query_cam: Query<&Transform, With<Camera3d>>,
 ) {
     let cam_transform = query_cam.get_single().unwrap();

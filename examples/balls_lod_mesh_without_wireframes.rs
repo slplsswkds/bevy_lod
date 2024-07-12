@@ -20,13 +20,13 @@ fn spawn_lodable_uv_spheres_meshes_test(
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let lod_mesh = lod_mesh::LODMesh {
+    let lod_mesh = lod_mesh::LodMesh {
         l1: Some(asset_server.load("models/lod_test.glb#Mesh0/Primitive0")),
         l2: Some(asset_server.load("models/lod_test.glb#Mesh1/Primitive0")),
         l3: Some(asset_server.load("models/lod_test.glb#Mesh2/Primitive0")),
     };
 
-    let lod_distance = lod_distance::LODDistances::new(10.0, 20.0, 100.0);
+    let lod_distance = lod_distance::LodDistances::new(10.0, 20.0, 100.0);
 
     for z in -10..10 {
         for y in -10..10 {
