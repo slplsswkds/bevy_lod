@@ -19,25 +19,17 @@ pub fn lod_mesh_single(
 ) {
     let cam_transform = query_cam.get_single().unwrap();
 
-    let l1_distances_global = lod_settings.distances.l1;
-    let l2_distances_global = lod_settings.distances.l2;
-    let l3_distances_global = lod_settings.distances.l3;
+    let (l1_distances_global, l2_distances_global, l3_distances_global) = lod_settings.distances.get_tupple();
 
     for (mut mesh, mesh_transform, lod, distances_option) in &mut query_lod {
-        let l1_distance;
-        let l2_distance;
-        let l3_distance;
+        let (l1_distance, l2_distance, l3_distance);
 
         if let Some(distances) = distances_option {
-            // use unique values for LOD distances
-            l1_distance = distances.l1.clone();
-            l2_distance = distances.l2.clone();
-            l3_distance = distances.l3.clone();
+            // use unique values for each LOD distances
+            (l1_distance, l2_distance, l3_distance) = distances.get_tupple();
         } else {
             // use global values for LOD distances from Resource
-            l1_distance = l1_distances_global;
-            l2_distance = l2_distances_global;
-            l3_distance = l3_distances_global;
+            (l1_distance, l2_distance, l3_distance) = (l1_distances_global, l2_distances_global, l3_distances_global);
         }
 
         let distance = cam_transform.translation.distance(mesh_transform.translation);

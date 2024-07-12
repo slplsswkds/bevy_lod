@@ -18,4 +18,13 @@ impl LODDistances {
 
         Self { l1, l2, l3 }
     }
+
+    #[inline]
+    pub fn get_tupple(&self) -> (f32, f32, f32) {
+        let l1_distance = self.l1.clone();
+        let l2_distance = self.l2.clone();
+        let l3_distance = self.l3.clone();
+
+        return (l1_distance, l2_distance, l3_distance);
+    }
 }
