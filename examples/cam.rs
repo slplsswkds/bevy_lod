@@ -48,11 +48,9 @@ pub fn camera_test_move(
     } else if !cam_move.x_direct && transform.translation == cam_move.start {
         cam_move.x_direct = true;
         cam_move.progress = 0.0;
-    } else {
-    }
+    } else {}
 
 
     // transform.look_at(Vec3::ZERO, Vec3::Y);
     transform.look_at(Vec3::new(5.0, 8.0, 0.0), Vec3::Y);
-
 }

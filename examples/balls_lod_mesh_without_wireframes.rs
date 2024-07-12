@@ -25,11 +25,8 @@ fn spawn_lodable_uv_spheres_meshes_test(
         l2: Some(asset_server.load("models/lod_test.glb#Mesh1/Primitive0")),
         l3: Some(asset_server.load("models/lod_test.glb#Mesh2/Primitive0")),
     };
-    let lod_distance = lod_distance::LODDistances {
-        l1: 8.0,
-        l2: 30.0,
-        l3: 100.0,
-    };
+
+    let lod_distance = lod_distance::LODDistances::new(10.0, 20.0, 100.0);
 
     for z in -10..10 {
         for y in -10..10 {

@@ -1,9 +1,10 @@
-use bevy::math::NormedVectorSpace;
-use bevy::prelude::{Component, Handle, Mesh, Query, Transform, With, Camera3d};
+use bevy::prelude::{Component, Handle, Mesh, Query, Transform, With, Camera3d, Res};
 use crate::lod_distance::LODDistances;
+use crate::lod_settings::LODSettings;
 
 
-// !!!! Remove Clone component !!!!!
+// !!!! Remove Clone impl !!!!!
+/// LODs meshes for single entities.
 #[derive(Component, Clone)]
 pub struct LODMesh {
     pub l1: Option<Handle<Mesh>>,
@@ -11,15 +12,18 @@ pub struct LODMesh {
     pub l3: Option<Handle<Mesh>>,
 }
 
-pub fn lod_mesh(
+pub fn lod_mesh_single(
     mut query_lod: Query<(&mut Handle<Mesh>, &Transform, &LODMesh, Option<&LODDistances>)>,
+    lod_settings: Res<LODSettings>,
     query_cam: Query<&Transform, With<Camera3d>>,
 ) {
     let cam_transform = query_cam.get_single().unwrap();
 
-    for (mut mesh, mesh_transform, lod, distances_option) in &mut query_lod {
-        // let (mut mesh, mesh_transform, lod, distances_option) = query_lod.get_single_mut().unwrap();
+    let l1_distances_global = lod_settings.distances.l1;
+    let l2_distances_global = lod_settings.distances.l2;
+    let l3_distances_global = lod_settings.distances.l3;
 
+    for (mut mesh, mesh_transform, lod, distances_option) in &mut query_lod {
         let l1_distance;
         let l2_distance;
         let l3_distance;
@@ -31,12 +35,9 @@ pub fn lod_mesh(
             l3_distance = distances.l3.clone();
         } else {
             // use global values for LOD distances from Resource
-            // l1_distance = 12.0;
-            // l2_distance = 50.0;
-            // l3_distance = 100.0;
-            l1_distance = 1.0;
-            l2_distance = 1.0;
-            l3_distance = 1.0;
+            l1_distance = l1_distances_global;
+            l2_distance = l2_distances_global;
+            l3_distance = l3_distances_global;
         }
 
         let distance = cam_transform.translation.distance(mesh_transform.translation);

@@ -12,9 +12,6 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(WireframePlugin)
         .add_plugins(LODPlugin)
-        .insert_resource(lod_settings::LODSettings {
-            distances: lod_distance::LODDistances::new(10.0, 20.0, 100.0)
-        })
         .add_systems(Startup, (camera_setup, spawn_lodable_uv_spheres_meshes_test).chain())
         .add_systems(Update, camera_test_move)
         .run();
@@ -30,8 +27,6 @@ fn spawn_lodable_uv_spheres_meshes_test(
         l2: Some(asset_server.load("models/lod_test.glb#Mesh1/Primitive0")),
         l3: Some(asset_server.load("models/lod_test.glb#Mesh2/Primitive0")),
     };
-
-    let lod_distance = lod_distance::LODDistances::new(10.0, 20.0, 100.0);
 
     for z in -10..10 {
         for y in -10..10 {
@@ -49,7 +44,6 @@ fn spawn_lodable_uv_spheres_meshes_test(
                     },
                     bevy::pbr::wireframe::Wireframe,
                     lod_mesh.clone(),
-                    lod_distance.clone()
                 ));
             }
         }
