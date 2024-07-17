@@ -17,4 +17,4 @@ linker = "clang"
 rustflags = ["-C", "link-arg=-fuse-ld=lld"]
 
 [dependencies]
-bevy = "0.14"
+bevy = {version = "0.14", features = ["jpeg"]}
