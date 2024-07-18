@@ -21,7 +21,7 @@ pub fn lod_mesh_single(
 
     let (l1_distances_global, l2_distances_global, l3_distances_global) = lod_settings.distances.get_tupple();
 
-    for (mut mesh, mesh_transform, lod, distances_option) in &mut query_lod {
+    for (mut mesh, transform, lod_mesh, distances_option) in &mut query_lod {
         let (l1_distance, l2_distance, l3_distance);
 
         if let Some(distances) = distances_option {
@@ -32,14 +32,14 @@ pub fn lod_mesh_single(
             (l1_distance, l2_distance, l3_distance) = (l1_distances_global, l2_distances_global, l3_distances_global);
         }
 
-        let distance = cam_transform.translation.distance(mesh_transform.translation);
+        let distance = cam_transform.translation.distance(transform.translation);
 
         if distance <= l1_distance {
-            *mesh = lod.l1.clone().unwrap();
+            *mesh = lod_mesh.l1.clone().unwrap();
         } else if distance <= l2_distance {
-            *mesh = lod.l2.clone().unwrap();
+            *mesh = lod_mesh.l2.clone().unwrap();
         } else if distance <= l3_distance {
-            *mesh = lod.l3.clone().unwrap();
+            *mesh = lod_mesh.l3.clone().unwrap();
         }
     }
 }

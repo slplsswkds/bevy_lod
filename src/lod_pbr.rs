@@ -1,10 +1,6 @@
-use bevy::app::{App, Plugin};
-use bevy::ecs::bundle::DynamicBundle;
-use bevy::prelude::{Component, Query, Handle, Image, Transform, With, Camera3d, Res, ResMut, Assets, StandardMaterial, Mesh};
+use bevy::prelude::{Component, Query, Handle, Transform, With, Camera3d, Res, StandardMaterial};
 use crate::lod_distance::LodDistances;
-use crate::lod_mesh::LodMesh;
 use crate::lod_settings::LodSettings;
-
 
 #[derive(Component, Default, Clone)]
 pub struct LodPbr {
