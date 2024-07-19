@@ -12,6 +12,7 @@ use bevy::{
     prelude::*,
     window::PresentMode,
 };
+use bevy::pbr::VolumetricLight;
 
 fn main() {
     App::new()
@@ -51,12 +52,12 @@ fn spawn_ground(
 ) {
     let plane_mesh = meshes.add(Plane3d::new(Vec3::Y, Vec2::splat(1.0)));
     let lod_mesh = lod_mesh::LodMesh {
-        // l1: Some(asset_server.load("models/forest_ground_oak_pine_vol2/ground_l1_l2.glb#Mesh0/Primitive0")),
-        // l2: Some(asset_server.load("models/forest_ground_oak_pine_vol2/ground_l1_l2.glb#Mesh1/Primitive0")),
-        // l3: Some(plane_mesh),
-        l1: Some(plane_mesh.clone()),
-        l2: Some(plane_mesh.clone()),
+        l1: Some(asset_server.load("models/forest_ground_oak_pine_vol2/ground_l1_l2.glb#Mesh0/Primitive0")),
+        l2: Some(asset_server.load("models/forest_ground_oak_pine_vol2/ground_l1_l2.glb#Mesh1/Primitive0")),
         l3: Some(plane_mesh),
+        // l1: Some(plane_mesh.clone()),
+        // l2: Some(plane_mesh.clone()),
+        // l3: Some(plane_mesh),
     };
 
     let lod_distance = lod_distance::LodDistances::new(15.0, 30.0, 500.0);
@@ -122,7 +123,7 @@ fn setup_light(mut commands: Commands) {
             ..default()
         },
         ..default()
-    });
+    }).insert(VolumetricLight::default());
 }
 
 fn spawn_trees(
@@ -202,10 +203,9 @@ fn spawn_trees(
 fn spawn_grass(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let lod_distance = lod_distance::LodDistances::new(30.0, 50.0, 200.0);
+    let lod_distance = lod_distance::LodDistances::new(50.0, 100.0, 100.0001);
 
     let lod_mesh_grass = lod_mesh::LodMesh {
         l1: Some(asset_server.load("models/grass/grass.glb#Mesh0/Primitive0")),
@@ -213,13 +213,25 @@ fn spawn_grass(
         l3: Some(Handle::default()),
     };
 
-    let grass_material = materials.add(StandardMaterial {
-        base_color_texture: Some(asset_server.load("models/grass/512/Grass.png")),
-        metallic_roughness_texture: Some(asset_server.load("models/grass/512/Grass_Roughness.png")),
-        normal_map_texture: Some(asset_server.load("models/grass/512/Grass_Normal.png")),
-        alpha_mode: AlphaMode::AlphaToCoverage,
-        ..default()
-    });
+    let lod_pbr_grass = lod_pbr::LodPbr {
+        l1: Some(materials.add(StandardMaterial {
+            base_color_texture: Some(asset_server.load("models/grass/512/Grass.png")),
+            metallic_roughness_texture: Some(asset_server.load("models/grass/512/Grass_Roughness.png")),
+            normal_map_texture: Some(asset_server.load("models/grass/512/Grass_Normal.png")),
+            alpha_mode: AlphaMode::AlphaToCoverage,
+            double_sided: true,
+            ..default()
+        })),
+        l2: Some(materials.add(StandardMaterial {
+            base_color_texture: Some(asset_server.load("models/grass/32/Grass.png")),
+            metallic_roughness_texture: Some(asset_server.load("models/grass/512/Grass_Roughness.png")),
+            normal_map_texture: Some(asset_server.load("models/grass/32/Grass_Normal.png")),
+            alpha_mode: AlphaMode::AlphaToCoverage,
+            double_sided: true,
+            ..default()
+        })),
+        l3: Some(Handle::default()),
+    };
 
     let mut rng = rand::thread_rng();
 
@@ -238,11 +250,11 @@ fn spawn_grass(
             if rng.gen() && rng.gen() {
                 commands.spawn((
                     PbrBundle {
-                        material: grass_material.clone(),
                         transform: grass_transform,
                         ..Default::default()
                     },
                     lod_mesh_grass.clone(),
+                    lod_pbr_grass.clone(),
                     lod_distance.clone()
                 ));
             }

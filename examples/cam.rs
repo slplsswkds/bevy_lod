@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::core_pipeline::Skybox;
-use bevy::pbr::VolumetricFogSettings;
+use bevy::pbr::{ShadowFilteringMethod,VolumetricFogSettings};
+use bevy::render::texture::CompressedImageFormats;
 
 #[derive(Component)]
 pub struct CamMove {
@@ -14,11 +15,9 @@ pub struct CamMove {
 pub fn camera_setup(
     mut commands: Commands,
 ) {
-
     // Camera in 3D space.
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(-40.0, 10.0, -30.5).looking_at(Vec3::ZERO, Vec3::Y),
             camera: Camera {
                 hdr: true,
                 ..Default::default()
@@ -32,16 +31,18 @@ pub fn camera_setup(
             progress: 0.0,
             speed: 0.04,
         },
-        bevy::core_pipeline::bloom::BloomSettings::NATURAL
+        bevy::core_pipeline::bloom::BloomSettings::NATURAL,
         // Skybox {
         //     image: asset_server.load(".jpeg"),
         //     brightness: 1000.0,
         // },
-        // VolumetricFogSettings {
-        //     // This value is explicitly set to 0 since we have no environment map light
-        //     ambient_intensity: 0.0,
-        //     ..default()
-        // },
+        VolumetricFogSettings {
+            ambient_intensity: 0.0,
+            light_intensity: 0.1,
+            ..default()
+        },
+        ShadowFilteringMethod::Temporal //Hardware2x2,
+
     ));
 }
 
