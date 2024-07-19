@@ -32,10 +32,7 @@ pub fn camera_setup(
             progress: 0.0,
             speed: 0.04,
         },
-        bevy::core_pipeline::bloom::BloomSettings {
-            intensity: 0.3,
-            ..default()
-        },
+        bevy::core_pipeline::bloom::BloomSettings::NATURAL
         // Skybox {
         //     image: asset_server.load(".jpeg"),
         //     brightness: 1000.0,

@@ -1,22 +1,49 @@
 mod cam;
 
-use bevy::{
-    prelude::*,
-};
+use std::num::NonZero;
+use bevy::prelude::*;
 use bevy_lod::*;
 use cam::*;
 use rand::Rng;
 
+use bevy::{
+    pbr::{DirectionalLightShadowMap, PointLightShadowMap},
+    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    prelude::*,
+    window::PresentMode,
+};
+
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Forest Scene".into(),
+                    resolution: (1000., 600.).into(),
+                    present_mode: PresentMode::AutoVsync,
+                    // composite_alpha_mode: CompositeAlphaMode::Inherit, // or opaque
+                    visible: true,
+                    resizable: false,
+                    transparent: false,
+                    ime_enabled: false,
+                    desired_maximum_frame_latency: NonZero::new(1),
+                    ..default()
+                }),
+                ..default()
+            }),
+            LogDiagnosticsPlugin::default(),
+            FrameTimeDiagnosticsPlugin,
+        ))
+        .insert_resource(DirectionalLightShadowMap { size: 512 })
+        .insert_resource(PointLightShadowMap { size: 128 })
         .add_plugins(LODPlugin)
-        .add_systems(Startup, (setup_light, camera_setup, spawn_lodable_cube_textures, spawn_lodable_trees).chain())
+        .add_systems(Startup, (setup_light, camera_setup, spawn_ground, spawn_trees, spawn_grass).chain())
+        // .add_systems(Startup, (setup_light, camera_setup, spawn_grass).chain())
         .add_systems(Update, camera_test_move)
         .run();
 }
 
-fn spawn_lodable_cube_textures(
+fn spawn_ground(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -24,8 +51,11 @@ fn spawn_lodable_cube_textures(
 ) {
     let plane_mesh = meshes.add(Plane3d::new(Vec3::Y, Vec2::splat(1.0)));
     let lod_mesh = lod_mesh::LodMesh {
-        l1: Some(asset_server.load("models/forest_ground_oak_pine_vol2/ground_l1_l2.glb#Mesh0/Primitive0")),
-        l2: Some(asset_server.load("models/forest_ground_oak_pine_vol2/ground_l1_l2.glb#Mesh1/Primitive0")),
+        // l1: Some(asset_server.load("models/forest_ground_oak_pine_vol2/ground_l1_l2.glb#Mesh0/Primitive0")),
+        // l2: Some(asset_server.load("models/forest_ground_oak_pine_vol2/ground_l1_l2.glb#Mesh1/Primitive0")),
+        // l3: Some(plane_mesh),
+        l1: Some(plane_mesh.clone()),
+        l2: Some(plane_mesh.clone()),
         l3: Some(plane_mesh),
     };
 
@@ -39,7 +69,6 @@ fn spawn_lodable_cube_textures(
                 metallic_roughness_texture: Some(asset_server.load("models/forest_ground_oak_pine_vol2/1k/roughness.jpeg")),
                 normal_map_texture: Some(asset_server.load("models/forest_ground_oak_pine_vol2/1k/normal.jpeg")),
                 emissive_texture: Some(asset_server.load("models/forest_ground_oak_pine_vol2/1k/height.jpeg")),
-                metallic: 1.0,
                 ..Default::default()
             }
         )),
@@ -50,7 +79,6 @@ fn spawn_lodable_cube_textures(
                 metallic_roughness_texture: Some(asset_server.load("models/forest_ground_oak_pine_vol2/256/roughness.jpeg")),
                 normal_map_texture: Some(asset_server.load("models/forest_ground_oak_pine_vol2/256/normal.jpeg")),
                 emissive_texture: Some(asset_server.load("models/forest_ground_oak_pine_vol2/256/height.jpeg")),
-                metallic: 1.0,
                 ..Default::default()
             }
         )),
@@ -61,7 +89,6 @@ fn spawn_lodable_cube_textures(
                 metallic_roughness_texture: Some(asset_server.load("models/forest_ground_oak_pine_vol2/32/roughness.jpeg")),
                 normal_map_texture: Some(asset_server.load("models/forest_ground_oak_pine_vol2/32/normal.jpeg")),
                 emissive_texture: Some(asset_server.load("models/forest_ground_oak_pine_vol2/32/height.jpeg")),
-                metallic: 1.0,
                 ..Default::default()
             }
         )),
@@ -86,56 +113,24 @@ fn spawn_lodable_cube_textures(
 }
 
 fn setup_light(mut commands: Commands) {
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(17.0, 20.0, -10.0).looking_at(Vec3::ZERO, Vec3::Y),
-        point_light: PointLight {
-            intensity: 5000_000_0.0,
-            // color: Color::srgb(1.0, 0.0, 0.0),
-            color: Color::srgb(0.250, 0.214, 0.165),
-            shadows_enabled: false,
-            range: 30.0,
-            shadow_depth_bias: 0.001, // Налаштування глибини тіней
-            shadow_normal_bias: 0.001, // Налаштування нормалей тіней
-            ..default()
-        },
-        ..default()
-    });
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(-15.0, 20.0, -24.0).looking_at(Vec3::ZERO, Vec3::Y),
-        point_light: PointLight {
-            intensity: 5000000000.0,
-            // color: Color::srgb(0.0, 0.0, 1.0),
-            color: Color::srgb(0.250, 0.214, 0.165),
-            shadows_enabled: false,
-            range: 30.0,
-            shadow_depth_bias: 0.001, // Налаштування глибини тіней
-            shadow_normal_bias: 0.001, // Налаштування нормалей тіней
-            ..default()
-        },
-        ..default()
-    });
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(0.0, 20.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
-        point_light: PointLight {
-            intensity: 500000000.0,
-            // color: Color::srgb(0.0, 0.0, 1.0),
-            color: Color::srgb(0.250, 0.214, 0.165),
-            shadows_enabled: false,
-            range: 30.0,
-            shadow_depth_bias: 0.001, // Налаштування глибини тіней
-            shadow_normal_bias: 0.001, // Налаштування нормалей тіней
+    commands.spawn(DirectionalLightBundle {
+        transform: Transform::from_xyz(-100.0, 50.0, -100.0).looking_at(Vec3::ZERO, Vec3::Y),
+        directional_light: DirectionalLight {
+            color: Color::srgb(0.25, 0.13, 0.11),
+            illuminance: 1000000.0,
+            shadows_enabled: true,
             ..default()
         },
         ..default()
     });
 }
 
-fn spawn_lodable_trees(
+fn spawn_trees(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let lod_distance = lod_distance::LodDistances::new(50.0, 130.0, 500.0);
+    let lod_distance = lod_distance::LodDistances::new(60.0, 200.0, 500.0);
 
     let lod_mesh_stem = lod_mesh::LodMesh {
         l1: Some(asset_server.load("models/tree/tree.glb#Mesh2/Primitive0")),
@@ -148,12 +143,6 @@ fn spawn_lodable_trees(
         l2: Some(asset_server.load("models/tree/tree.glb#Mesh5/Primitive0")),
         l3: Some(Handle::default()), //Some(meshes.add(Plane3d::new(Vec3::Y, Vec2::splat(1.0))))//Some(asset_server.load("models/tree/tree.glb#Mesh6/Primitive0")),
     };
-
-    // let lod_mesh_branches = lod_mesh::LodMesh {
-    //     l1: Some(asset_server.load("models/tree/tree.glb#Mesh1/Primitive0")),
-    //     l2: Some(asset_server.load("models/tree/tree.glb#Mesh5/Primitive0")),
-    //     l3: default()
-    // };
 
     let stem_material = materials.add(StandardMaterial {
         base_color_texture: Some(asset_server.load("models/tree/trunk_Base_color.png")),
@@ -172,46 +161,91 @@ fn spawn_lodable_trees(
     });
 
     let mut rng = rand::thread_rng();
-    for z in -50..50 {
-        for x in -50..50 {
+    for z in -30..30 {
+        for x in -30..30 {
             let rand_range = -7.0..=7.0;
             let x_rand = rng.gen_range(rand_range.clone());
             let z_rand = rng.gen_range(rand_range);
 
             let random_yaw = rng.gen_range(0.0..std::f32::consts::TAU);
 
-
             let tree_transform = Transform::from_xyz(12.0 * x as f32 + x_rand, 8.5, 12.0 * z as f32 + z_rand).with_rotation(Quat::from_rotation_y(random_yaw));
 
-            commands.spawn((
-                PbrBundle {
-                    material: stem_material.clone(),
-                    transform: tree_transform.clone(),
-                    ..Default::default()
-                },
-                lod_mesh_stem.clone(),
-                lod_distance.clone()
-            ));
+            if rng.gen() {
+                commands.spawn((
+                    PbrBundle {
+                        material: stem_material.clone(),
+                        transform: tree_transform.clone(),
+                        ..Default::default()
+                    },
+                    lod_mesh_stem.clone(),
+                    lod_distance.clone()
+                ));
 
-            commands.spawn((
-                PbrBundle {
-                    material: leaf_material.clone(),
-                    transform: tree_transform.clone(),
-                    ..Default::default()
-                },
-                lod_mesh_leaf.clone(),
-                lod_distance.clone()
-            ));
+                if rng.gen() || rng.gen() {
+                    commands.spawn((
+                        PbrBundle {
+                            material: leaf_material.clone(),
+                            transform: tree_transform.clone(),
+                            ..Default::default()
+                        },
+                        lod_mesh_leaf.clone(),
+                        lod_distance.clone()
+                    ));
+                }
+            }
+        }
+    }
+}
 
-            // commands.spawn((
-            //     PbrBundle {
-            //         material: leaf_material.clone(),
-            //         transform: Transform::from_xyz(6.0, 8.5, 6.0),
-            //         ..Default::default()
-            //     },
-            //     lod_mesh_branches.clone(),
-            //     lod_distance.clone()
-            // ));
+
+fn spawn_grass(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let lod_distance = lod_distance::LodDistances::new(30.0, 50.0, 200.0);
+
+    let lod_mesh_grass = lod_mesh::LodMesh {
+        l1: Some(asset_server.load("models/grass/grass.glb#Mesh0/Primitive0")),
+        l2: Some(asset_server.load("models/grass/grass.glb#Mesh1/Primitive0")),
+        l3: Some(Handle::default()),
+    };
+
+    let grass_material = materials.add(StandardMaterial {
+        base_color_texture: Some(asset_server.load("models/grass/512/Grass.png")),
+        metallic_roughness_texture: Some(asset_server.load("models/grass/512/Grass_Roughness.png")),
+        normal_map_texture: Some(asset_server.load("models/grass/512/Grass_Normal.png")),
+        alpha_mode: AlphaMode::AlphaToCoverage,
+        ..default()
+    });
+
+    let mut rng = rand::thread_rng();
+
+    for z in -50..50 {
+        for x in -50..50 {
+            let rand_range = -3.0..=3.0;
+            let x_rand = rng.gen_range(rand_range.clone());
+            let z_rand = rng.gen_range(rand_range);
+
+            let random_yaw = rng.gen_range(0.0..std::f32::consts::TAU);
+
+            let grass_transform = Transform::from_xyz(x as f32 + x_rand, 9.0, z as f32 + z_rand)
+                .with_scale(Vec3::splat(0.4))
+                .with_rotation(Quat::from_rotation_y(random_yaw));
+
+            if rng.gen() && rng.gen() {
+                commands.spawn((
+                    PbrBundle {
+                        material: grass_material.clone(),
+                        transform: grass_transform,
+                        ..Default::default()
+                    },
+                    lod_mesh_grass.clone(),
+                    lod_distance.clone()
+                ));
+            }
         }
     }
 }
