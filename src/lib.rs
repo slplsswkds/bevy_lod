@@ -11,6 +11,7 @@ use crate::{
     lod_pbr::lod_pbr,
 };
 
+/// Plugin that handle all LODs
 pub struct LODPlugin;
 
 impl Plugin for LODPlugin {

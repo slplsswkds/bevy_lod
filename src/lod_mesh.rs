@@ -2,16 +2,20 @@ use bevy::prelude::{Component, Handle, Mesh, Query, Transform, With, Camera3d, R
 use crate::lod_distance::LodDistances;
 use crate::lod_settings::LodSettings;
 
-
-// !!!! Remove Clone impl !!!!!
-/// LODs meshes for single entities.
+/// Levels of Detail for Mesh
 #[derive(Component, Clone)]
 pub struct LodMesh {
+    /// Contains the largest number of polygons
     pub l1: Option<Handle<Mesh>>,
+
+    /// Contains the optimal number of polygons
     pub l2: Option<Handle<Mesh>>,
+
+    /// Contains the smallest number of polygons
     pub l3: Option<Handle<Mesh>>,
 }
 
+/// System that measures the distance between the entity to the camera and changes the mesh detail level
 pub fn lod_mesh_single(
     mut query_lod: Query<(&mut Handle<Mesh>, &Transform, &LodMesh, Option<&LodDistances>)>,
     lod_settings: Res<LodSettings>,

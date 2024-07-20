@@ -2,13 +2,20 @@ use bevy::prelude::{Component, Query, Handle, Transform, With, Camera3d, Res, St
 use crate::lod_distance::LodDistances;
 use crate::lod_settings::LodSettings;
 
+/// Levels of Detail for Material
 #[derive(Component, Default, Clone)]
 pub struct LodPbr {
+    /// Material with the best image quality
     pub l1: Option<Handle<StandardMaterial>>,
+
+    /// Material with optimal image quality
     pub l2: Option<Handle<StandardMaterial>>,
+
+    /// Material with the worst image quality
     pub l3: Option<Handle<StandardMaterial>>,
 }
 
+/// System that measures the distance between the entity to the camera and changes the material detail level
 pub fn lod_pbr(
     mut query_lod: Query<(&mut Handle<StandardMaterial>, &Transform, &LodPbr, Option<&LodDistances>)>,
     lod_settings: Res<LodSettings>,
